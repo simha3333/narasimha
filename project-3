@@ -1,0 +1,54 @@
+# Import necessary libraries
+import requests
+import json
+import time
+
+# Define API key and base URL
+API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"
+BASE_URL = "https://maps.googleapis.com/maps/api/directions/json?"
+
+# Function to fetch traffic data
+def fetch_traffic_data(origin, destination):
+    url = f"{BASE_URL}origin={origin}&destination={destination}&key={API_KEY}&departure_time=now&traffic_model=best_guess"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        return data
+    else:
+        print("Error fetching traffic data.")
+        return None
+
+# Function to process traffic data
+def process_traffic_data(data):
+    if data:
+        # Extract relevant information
+        travel_time = data['routes'][0]['legs'][0]['duration_in_traffic']['value']
+        incidents = data['routes'][0]['legs'][0]['steps']  # Analyze steps for incidents
+        alternative_routes = data['routes'][1:] # Consider multiple routes
+
+        # Format data for display
+        formatted_data = {
+            "travel_time": f"{travel_time // 60} minutes",
+            "incidents": incidents,
+            "alternative_routes": alternative_routes
+        }
+        return formatted_data
+
+# Function to display traffic information
+def display_traffic_info(formatted_data):
+    print(f"Estimated Travel Time: {formatted_data['travel_time']}")
+    # Display incidents
+    # Display alternative routes
+
+# Main program loop
+while True:
+    start_location = input("Enter starting point: ")
+    end_location = input("Enter destination: ")
+
+    traffic_data = fetch_traffic_data(start_location, end_location)
+    formatted_data = process_traffic_data(traffic_data)
+
+    display_traffic_info(formatted_data)
+
+    # Update traffic data every X minutes (e.g., 5 minutes)
+    time.sleep(300)
